@@ -45,7 +45,10 @@ open class PDFViewController: UIViewController {
     /// A closure that defines an action to take upon selecting the share button.
     /// The default action brings up a UIActivityViewController
     open lazy var shareBarButtonAction: () -> () = { self.showActivitySheet() }
-    
+
+    /// A closure that is called when a new page is displayed
+    open lazy var didDisplayPage: ((Int) -> ())?
+
     /// A reference to the collection view handling page presentation
     var collectionView: PDFSinglePageViewer!
     
@@ -302,6 +305,7 @@ extension PDFViewController: PDFPageScrubberDelegate {
 
 extension PDFViewController: PDFSinglePageViewerDelegate {
     public func singlePageViewer(_ collectionView: PDFSinglePageViewer, didDisplayPage page: Int) {
+        didDisplayPage?(page)
         document.currentPage = page
         if showsScrubber {
             pageScrubber.updateScrubber()
