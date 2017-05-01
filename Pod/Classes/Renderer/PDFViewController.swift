@@ -26,6 +26,9 @@ open class PDFViewController: UIViewController {
     
     /// A boolean value that determines if annotations are allowed
     open var allowsAnnotations: Bool = true
+
+    /// A boolean value that determines if thumbnail view is allowed
+    open var allowsThumbnailView: Bool = true
     
     /// A boolean value that determines if sharing should be allowed
     open var allowsSharing: Bool = true
@@ -49,8 +52,8 @@ open class PDFViewController: UIViewController {
     /// A closure that is called when a new page is displayed
     open lazy var didDisplayPage: (Int) -> () = { _ in }
 
-    /// Height of scrubber view 
-    open var scrubberHeight: CGFloat = 44.0
+    /// Color of background
+    open var backgroundColor: UIColor = UIColor.darkGray
 
     /// A reference to the collection view handling page presentation
     var collectionView: PDFSinglePageViewer!
@@ -84,13 +87,14 @@ open class PDFViewController: UIViewController {
     override open func viewDidLoad() {
         super.viewDidLoad()
         
-        pageScrubber = PDFPageScrubber(frame: CGRect(x: 0, y: view.frame.size.height - bottomLayoutGuide.length, width: view.frame.size.width, height: scrubberHeight), document: document)
+        pageScrubber = PDFPageScrubber(frame: CGRect(x: 0, y: view.frame.size.height - bottomLayoutGuide.length, width: view.frame.size.width, height: 44.0), document: document)
         pageScrubber.scrubberDelegate = self
         pageScrubber.translatesAutoresizingMaskIntoConstraints = false
         
         collectionView = PDFSinglePageViewer(frame: view.bounds, document: document)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.singlePageDelegate = self
+        collectionView.backgroundColor = self.backgroundColor
         
         let flowLayout = collectionView.collectionViewLayout as! UICollectionViewFlowLayout
         flowLayout.scrollDirection = scrollDirection
@@ -121,7 +125,7 @@ open class PDFViewController: UIViewController {
         pageScrubber.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         pageScrubber.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         pageScrubber.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        pageScrubber.heightAnchor.constraint(equalToConstant: scrubberHeight).isActive = true
+        pageScrubber.heightAnchor.constraint(equalToConstant: 44.0).isActive = true
         
         automaticallyAdjustsScrollViewInsets = false
         
@@ -193,15 +197,16 @@ open class PDFViewController: UIViewController {
             buttons.append(shareFormBarButtonItem)
             self.shareBarButtonItem = shareFormBarButtonItem
         }
-        
-        buttons.append(PDFBarButton(
-            image: UIImage.bundledImage("thumbs"),
-            toggled: false,
-            target: self,
-            action: #selector(PDFViewController.showThumbnailView)
+
+        if allowsThumbnailView {
+            buttons.append(PDFBarButton(
+                image: UIImage.bundledImage("thumbs"),
+                toggled: false,
+                target: self,
+                action: #selector(PDFViewController.showThumbnailView)
+                )
             )
-        )
-        
+        }
         
         if allowsAnnotations {
             if showingAnnotations {
